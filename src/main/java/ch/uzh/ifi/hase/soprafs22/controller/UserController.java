@@ -27,19 +27,13 @@ public class UserController {
     this.userService = userService;
   }
 
-  @GetMapping("/users")
+  @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
+  public UserGetDTO getUserById(@PathVariable("userId") Long userId) {
     // fetch all users in the internal representation
-    List<User> users = userService.getUsers();
-    List<UserGetDTO> userGetDTOs = new ArrayList<>();
-
-    // convert each user to the API representation
-    for (User user : users) {
-      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-    }
-    return userGetDTOs;
+    User user = userService.getUserById(userId);
+    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
 
   @PostMapping("/users")
