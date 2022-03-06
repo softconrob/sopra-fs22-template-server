@@ -60,6 +60,14 @@ public class UserService {
     return newUser;
   }
 
+  public void updateUser(User user){
+      checkIfUserExists(user);
+      Long id = user.getId();
+      User oldUser = userRepository.findUserById(id);
+      oldUser.setBirthday(user.getBirthday());
+      oldUser.setUsername(user.getUsername());
+  }
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
