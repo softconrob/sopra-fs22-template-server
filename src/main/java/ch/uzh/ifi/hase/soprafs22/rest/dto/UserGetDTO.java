@@ -10,8 +10,8 @@ public class UserGetDTO {
   //private String password;
   private String username;
   //private UserStatus status;
-  private Date creationDate;
-  private boolean loggedIn;
+  private Date creation_date;
+  private boolean logged_in;
   private Date birthday;
 
 
@@ -34,19 +34,19 @@ public class UserGetDTO {
 
 
     public Date getCreationDate() {
-        return creationDate;
+        return creation_date;
     }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
+    public void setCreationDate(Date creation_date) {
+        this.creation_date = creation_date;
     }
 
     public boolean getLoggedIn() {
-        return loggedIn;
+        return logged_in;
     }
 
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
+    public void setLoggedIn(boolean logged_in) {
+        this.logged_in = logged_in;
     }
 
     public Date getBirthday() {

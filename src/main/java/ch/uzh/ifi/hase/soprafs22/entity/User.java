@@ -36,10 +36,10 @@ public class User implements Serializable {
   private String token;
 
   @Column(nullable = false)
-  private Date creationDate = new Date();
+  private Date creation_date = new Date();
 
   @Column(nullable = false)
-  private boolean loggedIn;
+  private boolean logged_in;
 
   @Column(nullable = true)
   private Date birthday;
@@ -88,19 +88,19 @@ public class User implements Serializable {
   }
 
     public Date getCreationDate() {
-        return creationDate;
+        return creation_date;
     }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
+    public void setCreationDate(Date creation_date) {
+        this.creation_date = creation_date;
     }
 
     public boolean getLoggedIn() {
-        return loggedIn;
+        return logged_in;
     }
 
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
+    public void setLoggedIn(boolean logged_in) {
+        this.logged_in = logged_in;
     }
 
     public Date getBirthday() {
