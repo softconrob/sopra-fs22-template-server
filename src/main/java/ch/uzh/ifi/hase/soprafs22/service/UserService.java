@@ -45,6 +45,17 @@ public class UserService {
 
   }
 
+  public User loginUser(User userInput){
+      User existingUser = userRepository.findByUsername(userInput.getUsername());
+      if (existingUser == null){
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No user with this username");
+      }
+      if (!userInput.getPassword().equals(existingUser.getPassword())){
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Password incorrect");
+      }
+      return existingUser;
+  }
+
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
