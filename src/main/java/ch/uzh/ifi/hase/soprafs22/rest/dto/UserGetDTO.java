@@ -33,19 +33,19 @@ public class UserGetDTO {
   }
 
 
-    public Date getCreationDate() {
+    public Date getcreation_date() {
         return creation_date;
     }
 
-    public void setCreationDate(Date creation_date) {
+    public void setcreation_date(Date creation_date) {
         this.creation_date = creation_date;
     }
 
-    public boolean getLoggedIn() {
+    public boolean getlogged_in() {
         return logged_in;
     }
 
-    public void setLoggedIn(boolean logged_in) {
+    public void setlogged_in(boolean logged_in) {
         this.logged_in = logged_in;
     }
 
