@@ -53,12 +53,13 @@ public class UserService {
       if (!userInput.getPassword().equals(existingUser.getPassword())){
           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Password incorrect");
       }
+      existingUser.setlogged_in(true);
       return existingUser;
   }
 
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setlogged_in(true);
 
     checkIfUserExists(newUser);
 
@@ -66,6 +67,7 @@ public class UserService {
     // flush() is called
     newUser = userRepository.save(newUser);
     userRepository.flush();
+
 
     log.debug("Created Information for User: {}", newUser);
     return newUser;

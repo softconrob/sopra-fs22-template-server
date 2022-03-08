@@ -51,7 +51,7 @@ public class UserController {
       return userGetDTOs;
   }
 
-    @GetMapping("/users/login")
+    @PutMapping("/users/login")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO) {

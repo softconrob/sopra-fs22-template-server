@@ -44,7 +44,7 @@ public class User implements Serializable {
   @Column(nullable = true)
   private Date birthday;
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   private UserStatus status;
 
   public Long getId() {
