@@ -54,15 +54,17 @@ public class UserService {
           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Password incorrect");
       }
       existingUser.setlogged_in(true);
+      userRepository.save(existingUser);
+      userRepository.flush();
       return existingUser;
   }
 
     public User logoutUser(User userInput){
         User currentUser = userRepository.findByToken(userInput.getToken());
-        if (currentUser != null && currentUser.getlogged_in() == true){
+        if (currentUser != null && currentUser.getlogged_in()){
             currentUser.setlogged_in(false);
-            //userRepository.save(currentUser);
-            //userRepository.flush();
+            userRepository.save(currentUser);
+            userRepository.flush();
             return currentUser;
         }
         else{
