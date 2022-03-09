@@ -57,6 +57,20 @@ public class UserService {
       return existingUser;
   }
 
+    public User logoutUser(User userInput){
+        User currentUser = userRepository.findByToken(userInput.getToken());
+        if (currentUser != null && currentUser.getlogged_in() == true){
+            currentUser.setlogged_in(false);
+            //userRepository.save(currentUser);
+            //userRepository.flush();
+            return currentUser;
+        }
+        else{
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Could not log out user");
+        }
+
+    }
+
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setlogged_in(true);
