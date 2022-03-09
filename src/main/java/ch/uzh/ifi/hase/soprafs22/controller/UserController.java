@@ -27,12 +27,12 @@ public class UserController {
     this.userService = userService;
   }
 
-  @GetMapping("/users/{userId}")
+  @GetMapping("/users/{Id}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO getUserById(@PathVariable("userId") Long userId) {
+  public UserGetDTO getUserById(@PathVariable("Id") Long Id) {
     // fetch all users in the internal representation
-    User user = userService.getUserById(userId);
+    User user = userService.getUserById(Id);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
 
@@ -73,6 +73,17 @@ public class UserController {
 
     }
 
+    @PutMapping("/users/{ID}/logout")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO logoutUser(@RequestBody Long ID) {
+
+        User loggedInUser = userService.getUserById(ID);
+        userService.logoutUser(loggedInUser);
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(loggedInUser);
+
+    }
+
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
@@ -87,7 +98,7 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/users/{Id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void updateUser(@RequestBody User user) {

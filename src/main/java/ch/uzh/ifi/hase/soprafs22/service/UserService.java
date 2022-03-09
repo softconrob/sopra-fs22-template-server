@@ -59,8 +59,8 @@ public class UserService {
       return existingUser;
   }
 
-    public User logoutUser(User userInput){
-        User currentUser = userRepository.findByToken(userInput.getToken());
+    public User logoutUser(User currentUser){
+
         if (currentUser != null && currentUser.getlogged_in()){
             currentUser.setlogged_in(false);
             userRepository.save(currentUser);
