@@ -7,6 +7,8 @@ import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.AdditionalMatchers;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,8 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -191,14 +193,18 @@ public class UserControllerTest {
         user.setToken("1");
         user.setStatus(UserStatus.ONLINE);
 
+
+//        when(userService.updateUser(Matchers.eq(user))).thenThrow(new ResponseStatusException(HttpStatus.NO_CONTENT));
+//        when(userService.updateUser(AdditionalMatchers.not(Matchers.eq(user)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+//        when(userService.updateUser(AdditionalMatchers.not(Mockito.eq(user)))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+//        //anything but not "ejb"
+//        when(userService.updateUser(not(eq(user))));
+
         UserPostDTO userPostDTO = new UserPostDTO();
         userPostDTO.setUsername("testUsername");
 
-
-        given(userService.createUser(Mockito.any())).willReturn(user);
-
         // when/then -> do the request + validate the result
-        MockHttpServletRequestBuilder putRequest = put("/users/{Id}", 13414)
+        MockHttpServletRequestBuilder putRequest = put("/users/{Id}", user.getId()+1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPostDTO));
 
