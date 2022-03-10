@@ -97,6 +97,21 @@ public class UserService {
       oldUser.setUsername(user.getUsername());
   }
 
+    public void updateUserBday(User user){
+        User userByUsername = userRepository.findByUsername(user.getUsername());
+
+        String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
+        if (userByUsername != null && user.getId() != userByUsername.getId()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is not unique");
+        }
+        Long id = user.getId();
+        User oldUser = userRepository.findUserById(id);
+        oldUser.setBirthday(user.getBirthday());
+        oldUser.setUsername(oldUser.getUsername());
+    }
+
+
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
