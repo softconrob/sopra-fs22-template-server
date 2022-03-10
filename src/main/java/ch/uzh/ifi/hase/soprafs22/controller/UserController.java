@@ -105,6 +105,13 @@ public class UserController {
         userService.updateUser(user);
     }
 
+    @PutMapping("/users/username/{Id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updateUsername(@RequestBody User user) {
+        userService.updateUsername(user);
+    }
+
     @PutMapping("/users/bday/{Id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
