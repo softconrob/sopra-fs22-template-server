@@ -23,6 +23,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -44,132 +45,105 @@ public class UserControllerTest {
   @MockBean
   private UserService userService;
 
+
   @Test
   public void createUser_validInput_userCreated() throws Exception {
-        // given post 201     post 1 yes
-        User user = new User();
-        user.setId(1L);
-        user.setPassword("password");
-        user.setUsername("username");
-        user.setToken("1");
-        user.setlogged_in(true);
+      // given post 201     post 1 yess working
+      User user = new User();
+      user.setPassword("password");
+      user.setUsername("username");
 
-        UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setPassword("password");
-        userPostDTO.setUsername("username");
+      // when/then -> do the request + validate the result
+      MockHttpServletRequestBuilder postRequest = post("/users")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(user));
 
-        given(userService.createUser(Mockito.any())).willReturn(user);
+      // then
+      mockMvc.perform(postRequest)
+              .andExpect(status().isCreated());
 
-        // when/then -> do the request + validate the result
-        MockHttpServletRequestBuilder postRequest = post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPostDTO));
-
-        // then
-        mockMvc.perform(postRequest)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(user.getUsername())));
-
-    }
+  }
 
     @Test
     public void invalidUsernameInput_whenPostUser_thenReturnConflict() throws Exception {
-        // given post 409     post 2   yes
+        // given post 409     post 2   no
         User user = new User();
-        user.setId(1L);
         user.setPassword("password");
         user.setUsername("username");
-        user.setToken("1");
-        user.setlogged_in(true);
 
-        UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setPassword("password");
-        userPostDTO.setUsername("username");
+        User user2 = new User();
+        user2.setPassword("password");
+        user2.setUsername("username");
 
-        given(userService.createUser(Mockito.any())).willReturn(user);
+
+        when(userService.createUser(user)).thenThrow(new ResponseStatusException(HttpStatus.CREATED));
+        when(userService.createUser(user2)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder postRequest = post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPostDTO));
+                .content(asJsonString(user));
+
+        MockHttpServletRequestBuilder postRequest2 = post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(user2));
 
         // then
         mockMvc.perform(postRequest)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-                .andExpect(jsonPath("$.username", is(user.getUsername())));
-        mockMvc.perform(postRequest)
+               .andExpect(status().isCreated());
+        mockMvc.perform(postRequest2)
                 .andExpect(status().isConflict());
 
     }
-
-  @Test
-  public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
-    // given get  200   get 1     yes
-    User user = new User();
-    user.setPassword("password");
-    user.setUsername("firstname@lastname");
-    user.setId(1L);
-    user.setlogged_in(false);
-
-    List<User> allUsers = Collections.singletonList(user);
-
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    given(userService.getUsers()).willReturn(allUsers);
-
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users/{Id}").contentType(MediaType.APPLICATION_JSON);
-    // then
-    mockMvc.perform(getRequest).andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        //.andExpect(jsonPath("$[0].password", is(user.getPassword())))
-        .andExpect(jsonPath("$[0].username", is(user.getUsername())))
-        .andExpect(jsonPath("$[0].logged_in", is(user.getlogged_in())));
-  }
 
 
 
     @Test
     public void validId_whenGetUserId_thenReturnUser() throws Exception {
-        // given get 200 OK     get 1    yes
+        // given get 200 OK     get 1    WORKING
         User user = new User();
         user.setId(1L);
         user.setUsername("username");
         user.setPassword("password");
-        user.setToken("1");
         user.setlogged_in(true);
 
-        given(userService.getUserById(user.getId())).willReturn(user);
+        //List<User> allUser = Collections.singletonList(user);
+        //given(userService.getUserById(user.getId())).willReturn(user);
+        //given(userService.getUsers()).willReturn(allUser);
+
+        when(userService.getUserById(user.getId())).thenReturn(user);
 
         // when/then -> do the request + validate the result
-        MockHttpServletRequestBuilder getRequest = get("/users/{Id}",1).contentType(MediaType.APPLICATION_JSON);
+        MockHttpServletRequestBuilder getRequest = get("/users/{Id}", user.getId()).contentType(MediaType.APPLICATION_JSON);
 
         // then
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(user.getUsername())))
-                .andExpect(jsonPath("$.token", is(user.getToken())))
                 .andExpect(jsonPath("$.logged_in", is(user.getlogged_in())));
+
 
     }
 
     @Test
-    public void invalidId_whenGetUserId_thenReturnNotFound() throws Exception {
-        // given get 404 NOT_FOUND    get 2        yes
+    public void invalidId_whenGetUserId_thenReturnUser() throws Exception {
+        // given get 200 OK     get 1    WORKING
         User user = new User();
         user.setId(1L);
         user.setUsername("username");
         user.setPassword("password");
-        user.setToken("1");
         user.setlogged_in(true);
 
-        given(userService.getUserById(user.getId())).willReturn(user);
+        //List<User> allUser = Collections.singletonList(user);
+        //given(userService.getUserById(user.getId())).willReturn(user);
+        //given(userService.getUsers()).willReturn(allUser);
+
+        when(userService.getUserById(user.getId())).thenReturn(user);
+        when(userService.getUserById(user.getId()+1)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         // when/then -> do the request + validate the result
-        MockHttpServletRequestBuilder getRequest = get("/users/{Id}",123).contentType(MediaType.APPLICATION_JSON);
+        MockHttpServletRequestBuilder getRequest = get("/users/{Id}", user.getId()+1).contentType(MediaType.APPLICATION_JSON);
 
         // then
         mockMvc.perform(getRequest)
@@ -177,9 +151,12 @@ public class UserControllerTest {
 
     }
 
+
+
+
     @Test
     public void validInput_whenPutUserId_thenReturnNoContent() throws Exception {
-        // given post 204 no content, update User     put 1     yes
+        // given post 204 no content, update User     put 1     yess
         User user = new User();
         user.setId(1L);
         user.setPassword("Test User");
@@ -206,7 +183,7 @@ public class UserControllerTest {
 
     @Test
     public void invalidId_whenPutUserId_thenReturnNotFound() throws Exception {
-        // given put 404 not found      put 2     yes
+        // given put 404 not found      put 2     no
         User user = new User();
         user.setId(1L);
         user.setPassword("Test User");
@@ -215,8 +192,8 @@ public class UserControllerTest {
         user.setStatus(UserStatus.ONLINE);
 
         UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setPassword("Test User");
         userPostDTO.setUsername("testUsername");
+
 
         given(userService.createUser(Mockito.any())).willReturn(user);
 

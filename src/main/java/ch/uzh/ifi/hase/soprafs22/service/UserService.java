@@ -92,6 +92,7 @@ public class UserService {
   public void updateUser(User user){
       checkIfUserExists(user);
       Long id = user.getId();
+      checkIfUserIdExists(id);
       User oldUser = userRepository.findUserById(id);
       oldUser.setBirthday(user.getBirthday());
       oldUser.setUsername(user.getUsername());
