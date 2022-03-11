@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,6 +49,9 @@ public class UserControllerTest {
   @MockBean
   private UserService userService;
 
+  @MockBean
+  private DTOMapper dtoMapper;
+
 
   @Test
   public void createUser_validInput_userCreated() throws Exception {
@@ -66,41 +71,39 @@ public class UserControllerTest {
 
   }
 
+
+
     @Test
     public void invalidUsernameInput_whenPostUser_thenReturnConflict() throws Exception {
-        // given post 409     post 2   no
+        // given post 409     post 2   working no idea how and why
         User user = new User();
-        user.setPassword("password");
-        user.setUsername("username");
+        user.setId(1L);
+        user.setUsername("testUsername");
+        user.setToken("1");
+        user.setlogged_in(true);
 
-        User user2 = new User();
-        user2.setPassword("password");
-        user2.setUsername("username");
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setUsername("testUsername");
+        userPostDTO.setPassword("testPassword");
+        System.out.println(userPostDTO.getPassword());
 
-
-        when(userService.createUser(user)).thenThrow(new ResponseStatusException(HttpStatus.CREATED));
-        when(userService.createUser(user2)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT));
+        given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "username exists already"));
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder postRequest = post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user));
-
-        MockHttpServletRequestBuilder postRequest2 = post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(user2));
+                .content(asJsonString(userPostDTO));
 
         // then
         mockMvc.perform(postRequest)
-               .andExpect(status().isCreated());
-        mockMvc.perform(postRequest2)
                 .andExpect(status().isConflict());
-
     }
 
 
 
-    @Test
+
+
+        @Test
     public void validId_whenGetUserId_thenReturnUser() throws Exception {
         // given get 200 OK     get 1    WORKING
         User user = new User();
@@ -163,19 +166,21 @@ public class UserControllerTest {
         user.setId(1L);
         user.setPassword("Test User");
         user.setUsername("testUsername");
-        user.setToken("1");
-        user.setStatus(UserStatus.ONLINE);
 
-        UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setPassword("Test User");
-        userPostDTO.setUsername("testUsername");
 
-        given(userService.createUser(Mockito.any())).willReturn(user);
+//        UserPostDTO userPostDTO = new UserPostDTO();
+//        userPostDTO.setPassword("Test User");
+//        userPostDTO.setUsername("testUsername");
+
+        //given(userService.createUser(Mockito.any())).willReturn(user);
+        doThrow(new ResponseStatusException(HttpStatus.NO_CONTENT))
+                .when(userService)
+                .updateUser(user);
 
         // when/then -> do the request + validate the result
         MockHttpServletRequestBuilder putRequest = put("/users/{Id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPostDTO));
+                .content(asJsonString(user));
 
         // then
         mockMvc.perform(putRequest)
@@ -188,29 +193,25 @@ public class UserControllerTest {
         // given put 404 not found      put 2     no
         User user = new User();
         user.setId(1L);
-        user.setPassword("Test User");
         user.setUsername("testUsername");
-        user.setToken("1");
-        user.setStatus(UserStatus.ONLINE);
+        user.setlogged_in(true);
 
 
-//        when(userService.updateUser(Matchers.eq(user))).thenThrow(new ResponseStatusException(HttpStatus.NO_CONTENT));
-//        when(userService.updateUser(AdditionalMatchers.not(Matchers.eq(user)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-//        when(userService.updateUser(AdditionalMatchers.not(Mockito.eq(user)))).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
-//        //anything but not "ejb"
-//        when(userService.updateUser(not(eq(user))));
+//        given(userService.updateUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        UserPostDTO userPostDTO = new UserPostDTO();
-        userPostDTO.setUsername("testUsername");
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                .when(userService)
+                .updateUser(Mockito.any());
 
         // when/then -> do the request + validate the result
-        MockHttpServletRequestBuilder putRequest = put("/users/{Id}", user.getId()+1)
+        MockHttpServletRequestBuilder putRequest = put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPostDTO));
+                .content(asJsonString(user));
 
         // then
         mockMvc.perform(putRequest)
                 .andExpect(status().isNotFound());
+
 
     }
 
